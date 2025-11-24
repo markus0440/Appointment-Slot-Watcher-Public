@@ -1,0 +1,25 @@
+#ТГ бот
+API_TOKEN=1234567890:AAH-ExampleTokenFromBotFather
+ADMIN_CHAT_ID=123456789
+
+#Интервал поиска
+SCHED_INTERVAL_SEC = 3600 #час
+
+#Список доступных городов
+ALLOWED_CITIES=Ekaterinburg,Moscow,Vladivostok,Saint-Petersburg
+
+#База данных
+DB_USER = appuser
+DB_PASSWORD = strong_password
+DB_HOST = localhost
+DB_PORT = 5432
+DB_NAME = appdb
+
+#Selenium
+WEBDRIVER_URL = http://localhost:4444
+
+# Selenium VNC (для входа на http://localhost:7900)
+VNC_PASSWORD=pass
+
+# Путь к пользовательскому соглашению
+AGREEMENT_PATH=agreements/pd_agreement.txt

@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} -h 127.0.0.1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    ports:
+      - "55432:5432" # опционально, если нужно подключаться снаружи
+
+  selenium:
+    image: selenium/standalone-chrome:136.0-20250828
+    shm_size: "2g"
+    environment:
+      SE_VNC_PASSWORD: ${VNC_PASSWORD:-pass}
+    ports:
+      - "4444:4444" # WebDriver
+      - "7900:7900" # VNC для отладки
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:4444/status | grep -q 'ready'"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      WEBDRIVER_URL: ${WEBDRIVER_URL:-http://selenium:4444}
+    volumes:
+      - ./agreements:/app/agreements:ro  # чтобы править соглашение без ребилда
+      - ./logs:/app/logs                  # чтобы писать логи в файл
+    depends_on:
+      postgres:
+        condition: service_healthy
+      selenium:
+        condition: service_healthy
+    command: ["python", "-u", "bot.py"]
+    restart: unless-stopped
+
+volumes:
+  pgdata:
